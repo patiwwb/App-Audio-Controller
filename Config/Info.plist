@@ -46,8 +46,6 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 
-	<!-- $(EXECUTABLE_NAME) / $(PRODUCT_*) are resolved by the build system at
-	     packaging time so this plist stays target-agnostic. -->
 	<key>CFBundleExecutable</key>
 	<string>AppAudioController</string>
 
