@@ -345,7 +345,12 @@ final class AudioTapManager: ObservableObject {
         let sampleRate = tapASBD.mSampleRate
         let ringFormat = AudioTapManager.makeInterleavedFloat32Format(
             sampleRate: sampleRate, channels: channels)
-        let capacityFrames = max(Int(sampleRate * 2.0), 8192)
+        // 100 ms headroom — enough to absorb IOProc/render-block scheduling jitter
+        // (~2–3 callback periods at 512 frames/48 kHz = ~30 ms), with plenty of margin.
+        // Long-term clock drift is handled by kAudioSubTapDriftCompensationKey in
+        // the aggregate, so we do NOT need multi-second capacity here. A large buffer
+        // (the old 2.0 s) causes an audible ~2 s delay when the source pauses/stops.
+        let capacityFrames = max(Int(sampleRate * 0.1), 4096)
         let ring = AudioRingBuffer(format: ringFormat, capacityFrames: capacityFrames)
 
         let playback = try TapProcessingEngine(tapFormat: tapASBD,

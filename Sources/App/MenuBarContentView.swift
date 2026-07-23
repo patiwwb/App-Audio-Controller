@@ -28,6 +28,7 @@ struct MenuBarContentView: View {
     @EnvironmentObject private var systemAudio: SystemAudioManager
     @State private var addError: String?
     @State private var showAllAvailable = false
+    @State private var isRefreshing = false
 
     /// Natural height of the scrollable content (outputSection + sourcesSection).
     /// Starts at a sane default so the window appears immediately; updated after
@@ -100,10 +101,13 @@ struct MenuBarContentView: View {
         .frame(width: 340, height: windowHeight)
         .animation(.easeInOut(duration: 0.15), value: windowHeight)
         .onAppear {
-            manager.refreshProcesses()
-            manager.refreshDevices()
-            systemAudio.refresh()
+            refreshAll()
             showAllAvailable = false
+        }
+        // Auto-refresh process list every 6 seconds while the menu is open
+        // so newly launched / quit apps appear without any manual action.
+        .onReceive(Timer.publish(every: 6, on: .main, in: .common).autoconnect()) { _ in
+            manager.refreshProcesses()
         }
     }
 
@@ -117,7 +121,28 @@ struct MenuBarContentView: View {
             Text("Audio Controller")
                 .font(.headline)
             Spacer()
+            // Refresh everything: process list, output devices, system audio state.
+            Button {
+                refreshAll()
+            } label: {
+                Image(systemName: "arrow.clockwise")
+                    .rotationEffect(.degrees(isRefreshing ? 360 : 0))
+                    .animation(isRefreshing ? .linear(duration: 0.5) : .default, value: isRefreshing)
+            }
+            .buttonStyle(.borderless)
+            .help("Refresh sources and devices")
             sessionCountBadge
+        }
+    }
+
+    private func refreshAll() {
+        isRefreshing = true
+        manager.refreshProcesses()
+        manager.refreshDevices()
+        systemAudio.refresh()
+        // Brief visual feedback — reset after half a rotation completes.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            isRefreshing = false
         }
     }
 

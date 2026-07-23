@@ -37,7 +37,7 @@
 //  The producer (capture device clock) and consumer (output device clock) tick
 //  at slightly different rates, so over time one will outpace the other. The
 //  aggregate device's per-sub-tap drift compensation absorbs most of it; this
-//  buffer's headroom (sized for >= ~0.5 s by AudioTapManager) absorbs the rest.
+//  buffer's headroom (sized for ~100 ms by AudioTapManager) absorbs the rest.
 //  On overflow we drop the incoming block (write returns false); on underflow
 //  we report empty (read returns false) and the consumer emits silence.
 //
