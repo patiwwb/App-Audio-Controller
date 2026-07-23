@@ -350,7 +350,7 @@ final class AudioTapManager: ObservableObject {
         // Long-term clock drift is handled by kAudioSubTapDriftCompensationKey in
         // the aggregate, so we do NOT need multi-second capacity here. A large buffer
         // (the old 2.0 s) causes an audible ~2 s delay when the source pauses/stops.
-        let capacityFrames = max(Int(sampleRate * 0.1), 4096)
+        let capacityFrames = max(Int(sampleRate * 0.05), 2048)
         let ring = AudioRingBuffer(format: ringFormat, capacityFrames: capacityFrames)
 
         let playback = try TapProcessingEngine(tapFormat: tapASBD,
